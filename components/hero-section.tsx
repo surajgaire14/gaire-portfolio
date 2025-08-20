@@ -20,7 +20,7 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            Hi, I'm <span className="gradient-text">Alex Johnson</span>
+            Hi, I'm <span className="gradient-text">Suraj Gaire</span>
           </motion.h1>
           <motion.p
             className="text-xl sm:text-2xl lg:text-3xl text-muted-foreground font-medium"
@@ -28,7 +28,7 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
           >
-            Senior Web Developer turning ideas into scalable, modern web solutions
+            I'm a Web Developer turning ideas into scalable, modern web solutions
           </motion.p>
         </motion.div>
 
