@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Install SSH client
         run: sudo apt-get install -y openssh-client
-      - name: SSH into Lightsail and Deploy
+      - name: SSH into EC2 and Deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_PUBLIC_IP }}
