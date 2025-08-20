@@ -1,4 +1,4 @@
-name: Deploy api-easyfiling into lightsail
+name: Deploy gaire-portfolio into EC2
 on:
   push:
     branches:
@@ -6,7 +6,7 @@ on:
       
 jobs:
   deploy:
-    name: Deploy to LIGHTSAIL on beta branch push
+    name: Deploy to EC2 on beta branch push
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
