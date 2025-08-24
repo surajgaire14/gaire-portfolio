@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Work_Sans, Open_Sans } from "next/font/google"
-import "./globals.css"
+import "../globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
@@ -42,8 +42,9 @@ html {
         `}</style>
       </head>
       <body className={`${workSans.variable} ${openSans.variable} antialiased`}>
+        <Header />
         <main className="min-h-screen">{children}</main>
-
+        <Footer />
       </body>
     </html>
   )

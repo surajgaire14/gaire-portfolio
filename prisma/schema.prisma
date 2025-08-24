@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Set this to your Neon connection string:
+  // On Vercel, add it as an Environment Variable named DATABASE_URL.
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  details     Json?
+  createdAt   DateTime? @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @updatedAt @db.Timestamptz(6)
+  categoryId  String?
+  image       Json?
+  type        String?   @default("notable")
+  slug        String    @unique
+  category    Category? @relation(fields: [categoryId], references: [id], onUpdate: NoAction, map: "fk_project_category")
+
+  @@map("projects")
+}
+
+model Category {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @default(now()) @updatedAt
+  type        String?        @default("uncategorized")
+
+  // Relations
+  posts       Post[]         // convenient reverse relation
+  projects    Project[]
+  postsMany   PostCategory[] // explicit join model (many-to-many)
+
+  @@map("categories")
+}
+
+model Award {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  image       Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  type        String?  @default("Additional") @db.VarChar
+
+  @@map("awards")
+}
+
+model Post {
+  id            String     @id @default(cuid())
+  slug          String     @unique
+  title         String
+  description   String
+  content       String?
+  externalUrl   String?
+  isExternal    Boolean    @default(false)
+  tags          String[]
+  published     Boolean    @default(false)
+  focusKeyword  String?
+  seoData       Json?
+
+  // Category (optional)
+  categoryId    String?
+  category      Category?  @relation(fields: [categoryId], references: [id])
+
+  // Author (optional)
+  userId        String?
+  user          User?      @relation(fields: [userId], references: [id])
+
+  // Explicit many-to-many
+  postCategories PostCategory[]
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("posts")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          String?   @default("user")
+  profile_image String?   @default("")
+  createdAt     DateTime? @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime? @default(now()) @updatedAt @db.Timestamptz(6)
+
+  posts         Post[]
+
+  @@map("users")
+}
+
+model Leadership {
+  id        String   @id @default(cuid())
+  name      String
+  position  String
+  bio       String?
+  image     String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("leadership")
+}
+
+model PostCategory {
+  postId     String
+  categoryId String
+
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([postId, categoryId])
+  @@map("post_categories")
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String   @unique
+  phone     String?
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("feedbacks")
+}
+
+model Suggestion {
+  id        Int      @id @default(autoincrement())
+  subject   String
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@map("suggestions")
+}
+
+model Complain {
+  id        Int      @id @default(autoincrement())
+  subject   String
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@map("complains")
+}
+
+model SmtpSettings {
+  id         String    @id @default(cuid())
+  host       String
+  port       Int
+  username   String?
+  password   String?
+  fromEmail  String
+  fromName   String
+  encryption String    @default("tls")
+  enableAuth Boolean   @default(true)
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  lastTested DateTime? @db.Timestamptz(6)
+
+  @@index([isActive], map: "idx_smtp_settings_isActive")
+  @@map("smtp_settings")
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  subject     String
+  body        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@map("email_templates")
+}
+
+model EmailLog {
+  id         String    @id @default(cuid())
+  to         String
+  subject    String
+  body       String
+  status     String
+  error      String?
+  sentAt     DateTime? @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
+  templateId String?
+
+  @@index([sentAt], map: "idx_email_logs_sentAt")
+  @@index([status], map: "idx_email_logs_status")
+  @@map("email_logs")
+}
+
+model Tutorial {
+  id          String   @id
+  title       String
+  description String
+  difficulty  String
+  duration    String
+  image       String
+  featured    Boolean
+  category    String
+  tags        String[]
+
+  authorId    String
+  author      Author   @relation(fields: [authorId], references: [id])
+}
+
+model Author {
+  id      String   @id @default(cuid())
+  name    String
+  avatar  String
+
+  tutorials Tutorial[]
+}
