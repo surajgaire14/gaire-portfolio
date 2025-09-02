@@ -1,14 +1,14 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { createTutorialSchema, querySchema } from '@/@types/tutorial';
-import { 
-  successResponse, 
-  errorResponse, 
-  validationErrorResponse, 
-  notFoundResponse, 
-  handlePrismaError 
-} from '@/utils/api-response';
+import { db } from '@/lib/db';
+import { createTutorialSchema, querySchema } from '@/types/tutorial';
+// import { 
+//   successResponse, 
+//   errorResponse, 
+//   validationErrorResponse, 
+//   notFoundResponse, 
+//   handlePrismaError 
+// } from '@/utils/api-response';
 
 // GET /api/tutorials - List all tutorials with filtering and pagination
 export async function GET(request: NextRequest) {
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch tutorials with author details
     const [tutorials, totalCount] = await Promise.all([
-      prisma.tutorial.findMany({
+      db.tutorial.findMany({
         where,
         include: {
           author: {
@@ -64,12 +64,12 @@ export async function GET(request: NextRequest) {
           id: 'desc'
         }
       }),
-      prisma.tutorial.count({ where })
+      db.tutorial.count({ where })
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
 
-    return successResponse({
+    return Response.json({
       tutorials,
       pagination: {
         page,
@@ -79,16 +79,16 @@ export async function GET(request: NextRequest) {
         hasNext: page < totalPages,
         hasPrev: page > 1
       }
-    }, 'Tutorials retrieved successfully');
+    }, { status: 200 });
 
   } catch (error) {
     console.error('Error fetching tutorials:', error);
     
     if (error instanceof z.ZodError) {
-      return validationErrorResponse(error.errors, 'Invalid query parameters');
+      return Response.json({ error: 'Invalid query parameters' }, { status: 400 });
     }
 
-    return errorResponse('Internal server error', 500);
+    return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -101,16 +101,16 @@ export async function POST(request: NextRequest) {
     const validatedData = createTutorialSchema.parse(body);
     
     // Check if author exists
-    const author = await prisma.author.findUnique({
+    const author = await db.author.findUnique({
       where: { id: validatedData.authorId }
     });
     
     if (!author) {
-      return notFoundResponse('Author not found');
+      return Response.json({ error: 'Author not found' }, { status: 404 });
     }
 
     // Create tutorial
-    const tutorial = await prisma.tutorial.create({
+    const tutorial = await db.tutorial.create({
       data: {
         id: validatedData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
         ...validatedData
@@ -126,15 +126,15 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return successResponse(tutorial, 'Tutorial created successfully', 201);
+    return Response.json(tutorial, { status: 201 });
 
   } catch (error) {
     console.error('Error creating tutorial:', error);
     
     if (error instanceof z.ZodError) {
-      return validationErrorResponse(error.errors, 'Invalid request data');
+      return Response.json({ error: 'Invalid request data' }, { status: 400 });
     }
 
-    return handlePrismaError(error);
+    return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 } 

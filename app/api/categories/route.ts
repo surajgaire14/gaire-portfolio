@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { prisma } from "@/lib/prisma"
 
 // export async function GET(request: Request) {
 //   try {
@@ -22,7 +21,7 @@ import { prisma } from "@/lib/prisma"
 // }
 
 export async function GET() {
-  const categories = await prisma.category.findMany()
+  const categories = await db.category.findMany()
   return NextResponse.json({ success: true, categories })
 }
 
@@ -40,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     // Check if category already exists (case-insensitive)
-    const existingCategory = await prisma.category.findFirst({
+    const existingCategory = await db.category.findFirst({
       where: {
         name: {
           equals: name.trim(),
@@ -57,7 +56,7 @@ export async function POST(request: Request) {
     }
 
     // Create new category with optional fields
-    const category = await prisma.category.create({
+    const category = await db.category.create({
       data: {
         name: name.trim(),
         description: description?.trim() || null,

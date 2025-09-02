@@ -30,6 +30,8 @@ export async function requireAdmin() {
     redirect("/")
   }
 
+  
+
   return session
 }
 

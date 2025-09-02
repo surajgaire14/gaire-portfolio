@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
 import { getSession } from "@/lib/auth"
 import { createSlug, savePostToMarkdown } from "@/lib/blog"
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/db"
 
 export async function GET() {
   try {
@@ -72,7 +71,7 @@ export async function POST(request: NextRequest) {
       const slug = createSlug(title)
   
       // Save to database
-      const dbPost = await prisma.post.create({
+      const dbPost = await db.post.create({
         data: {
           slug,
           title,

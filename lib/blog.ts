@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 import matter from "gray-matter"
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/db"
 
 const postsDirectory = path.join(process.cwd(), "content", "posts")
 
@@ -13,13 +13,13 @@ if (!fs.existsSync(postsDirectory)) {
 export async function getAllPosts(): Promise<any[]> {
   try {
     // Get published posts from database
-    const dbPosts = await prisma.post.findMany({
+    const dbPosts = await db.post.findMany({
       where: { published: true },
       orderBy: { createdAt: "desc" },
     })
 
     // Convert database posts to BlogPost format
-    const posts: any[] = dbPosts.map((post) => ({
+    const posts: any[] = dbPosts.map((post: any) => ({
       id: post.id,
       slug: post.slug,
       title: post.title,
@@ -80,7 +80,7 @@ async function getPostsFromFileSystem(): Promise<any[]> {
 export async function getPostBySlug(slug: string): Promise<any | null> {
   try {
     // First try to get from database
-    const dbPost = await prisma.post.findUnique({
+    const dbPost = await db.post.findUnique({
       where: { slug, published: true },
     })
 

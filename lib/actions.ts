@@ -1,14 +1,13 @@
 "use server"
 
-import { put } from "@vercel/blob"
 import { env } from "@/lib/env"
 import fs from "fs"
 import path from "path"
 import { createSlug, savePostToMarkdown } from "./blog"
-import { prisma } from "./prisma"
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { db } from "@/lib/db"
 
 export async function uploadFile(formData: FormData) {
   try {
@@ -22,12 +21,12 @@ export async function uploadFile(formData: FormData) {
     const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "")}`
 
     // Upload to Vercel Blob
-    const blob = await put(filename, file, {
-      access: "public",
-      token: env.BLOB_READ_WRITE_TOKEN,
-    })
+    // const blob = await put(filename, file, {
+    //   access: "public",
+    //   token: env.BLOB_READ_WRITE_TOKEN,
+    // })
 
-    return { success: true, url: blob.url }
+    return { success: true, url: "" }
   } catch (error) {
     console.error("Error uploading file:", error)
     return { success: false, error: "Failed to upload file" }
@@ -146,7 +145,7 @@ export async function publishPost(data: PublishPostData) {
     const slug = createSlug(title)
 
     // Save to database
-    const dbPost = await prisma.post.create({
+    const dbPost = await db.post.create({
       data: {
         slug,
         title,
@@ -258,7 +257,7 @@ export async function saveDraft(data: PublishPostData) {
     const slug = createSlug(title)
 
     // Save to database
-    const dbPost = await prisma.post.create({
+    const dbPost = await db.post.create({
       data: {
         slug,
         title,
@@ -285,7 +284,7 @@ export async function deletePost(slug: string) {
     await requireAdmin()
 
     // Delete from database
-    await prisma.post.delete({
+    await db.post.delete({
       where: { slug },
     })
 
@@ -312,7 +311,7 @@ export async function updatePost(slug: string, data: PublishPostData) {
     const newSlug = createSlug(title)
 
     // Update in database
-    const dbPost = await prisma.post.update({
+    const dbPost = await db.post.update({
       where: { slug },
       data: {
         slug: newSlug,
@@ -353,7 +352,7 @@ export async function updatePost(slug: string, data: PublishPostData) {
 
 export async function getPostBySlugAction(slug: string) {
   try {
-    const dbPost = await prisma.post.findUnique({
+    const dbPost = await db.post.findUnique({
       where: { slug },
     })
 

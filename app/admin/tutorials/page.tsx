@@ -22,12 +22,12 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { TutorialsTableActions } from "@/components/dashboard/tutorials-table-actions"
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/db"
 
 // Get all tutorials with author information
 async function getAllTutorials() {
   try {
-    const tutorials = await prisma.tutorial.findMany({
+    const tutorials = await db.tutorial.findMany({
       include: {
         author: {
           select: {

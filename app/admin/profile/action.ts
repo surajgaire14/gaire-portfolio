@@ -3,7 +3,7 @@
 import { db } from "@/lib/db"
 import { hash, compare } from "bcrypt"
 import { revalidatePath } from "next/cache"
-import { put } from "@vercel/blob"
+import { saveMediaFile } from "@/lib/media-server"
 
 // Helper function to process base64 image data
 async function processImageUpload(imageData: string | null | undefined): Promise<string | null> {
@@ -26,19 +26,14 @@ async function processImageUpload(imageData: string | null | undefined): Promise
       const base64Data = matches[2]
       const buffer = Buffer.from(base64Data, "base64")
 
-      // Generate file extension from mime type
+      // Generate original filename
       const fileExtension = mimeType.split("/")[1] || "jpg"
+      const originalName = `profile-image.${fileExtension}`
 
-      // Generate a unique filename
-      const filename = `profile-${Date.now()}.${fileExtension}`
+      // Save to local media directory
+      const mediaFile = await saveMediaFile(buffer, originalName, mimeType)
 
-      // Upload to Vercel Blob
-      const blob = await put(filename, buffer, {
-        contentType: mimeType,
-        access: "public",
-      })
-
-      return blob.url
+      return mediaFile.url
     } catch (error) {
       console.error("Failed to process image:", error)
       throw new Error("Failed to process image upload")

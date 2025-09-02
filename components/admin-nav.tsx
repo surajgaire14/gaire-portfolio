@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Building, Award, FileText, Home, Settings, Users, FolderTree, ChevronDown, LogOut, Users2, BookOpen } from "lucide-react"
+import { Building, Award, FileText, Home, Settings, Users, FolderTree, ChevronDown, LogOut, Users2, BookOpen, Image } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -60,6 +60,11 @@ export function AdminNav() {
       title: "Tutorials",
       href: "/admin/tutorials",
       icon: BookOpen,
+    },
+    {
+      title: "Media",
+      href: "/admin/media",
+      icon: Image,
     },
     {
       title: "Users",

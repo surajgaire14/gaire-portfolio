@@ -37,8 +37,12 @@ export function SignInForm() {
         setError("Invalid credentials. Please try again.")
       } else {
         // Refresh the session and redirect
-        await getSession()
-        router.push("/admin")
+        const session = await getSession()
+        if(session?.user.role === "admin") {
+          router.push("/admin")
+        } else {
+          router.push("/")
+        }
         router.refresh()
       }
     } catch (error) {
